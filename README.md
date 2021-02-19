@@ -5,6 +5,7 @@ This is a small set of simple cv2 tools for quick manual centering and normalizi
 This toolset is dependent on:
 - python - https://www.python.org/downloads/
 - cv2 - https://pypi.org/project/opencv-python/
+
 If you have python installed, get cv2 with pip: ```pip install opencv-python``` and you should be ready to go!
 
 # Basic Use
