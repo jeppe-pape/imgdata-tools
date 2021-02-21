@@ -57,18 +57,17 @@ def on_click(event, x, y, flags, params):
 
         print(f"({params['num_img']}/{num_imgs})")
         
-
-        if args.croptype == "LARGEST":
-            crop = crop_largest_bound(img, cx, cy, resw, resh)
-
-        elif crop_type == "GIVEN":
-            new_resw, new_resh = resw * prop[0], resh * prop[0]
-            crop = crop_given_resolution(img, cx, cy, new_resw, new_resh)
-
         try:
+            if args.croptype == "LARGEST":
+                crop = crop_largest_bound(img, cx, cy, resw, resh)
+
+            elif args.croptype == "GIVEN":
+                new_resw, new_resh = resw * prop[0], resh * prop[0]
+                crop = crop_given_resolution(img, cx, cy, new_resw, new_resh)
+
             cv2.imwrite(f"{args.output}/{fname}", crop)
             cv2.destroyAllWindows()
-        except cv2.error:
+        except (cv2.error, IndexError):
             print("Crop out of bounds. Retry")
 
     elif event == cv2.EVENT_MBUTTONDOWN:
@@ -92,7 +91,7 @@ def on_click(event, x, y, flags, params):
         if args.croptype == "GIVEN": cv2.rectangle(drawn, (x - rect_width, y - rect_height), (x + rect_width, y + rect_height), (0, 20, 0), 1)
         cv2.imshow("image", drawn)
 
-    elif event == cv2.EVENT_MOUSEWHEEL and croptype == "GIVEN":
+    elif event == cv2.EVENT_MOUSEWHEEL and args.croptype == "GIVEN":
         if flags > 0:
 
             prop[0] = prop[0] + 0.05 * proportion

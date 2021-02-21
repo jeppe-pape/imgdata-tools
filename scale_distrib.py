@@ -78,11 +78,11 @@ def distribute_to_upscale(folder, desired_width, max_upscale=4, pre_resize=False
 
             if not os.path.exists(folder_name): os.mkdir(folder_name)
 
-            if get_image_size(path)[0] >= (desired_width / scale) * 1:
+            if get_image_size(path)[0] >= (desired_width / scale) * 0.8:
 
                 if pre_resize:
                     img = cv2.imread(path)
-                    img = cv2.resize(img, (int(desired_width / scale), int(desired_height / scale)), interpolation = cv2.INTER_AREA)
+                    img = cv2.resize(img, (int(desired_width / scale), int(desired_height / scale)), interpolation = cv2.INTER_CUBIC)
                     cv2.imwrite(os.path.join(folder_name,fname), img)
                 else:
                     shutil.copyfile(path, os.path.join(folder_name,fname))
