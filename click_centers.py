@@ -21,15 +21,13 @@ def parse_args():
                         help="Input folder of images to process")
 
     parser.add_argument("-o", "--output",
-                        help="Output folder of processed images",
-                        default="out")
+                        help="Output folder of processed images")
 
     parser.add_argument("-r", "--resolution", nargs="+", type=int,
                         help="'w h' tuple of desired output resolution")
 
     parser.add_argument("-d", "--deleted",
-                        help="Folder to put deleted images",
-                        default="deleted") 
+                        help="Folder to put deleted images") 
     
     parser.add_argument("-t", "--croptype",
                         help="Type of cropping to do. Currently supported: GIVEN, LARGEST. LARGEST default",
@@ -39,8 +37,6 @@ def parse_args():
     return args
 
 
-
-#global prop, new_resw, new_resh
 
 
 
@@ -75,13 +71,30 @@ def on_click(event, x, y, flags, params):
         cv2.destroyAllWindows()
 
     elif event == cv2.EVENT_MOUSEMOVE:
-
-        new_resw, new_resh = resw * prop[0], resh * prop[0]
         h, w = params["img"].shape[0:2]
-
         cx, cy = int((x/dim[0])*w), int((y/dim[1])*h)
+        min_width = min(cx, (params["img"].shape[1] - cx))
+        min_height = min(cy, (params["img"].shape[0] - cy))
+        if args.croptype == "GIVEN":
+            new_resw, new_resh = resw * prop[0], resh * prop[0]
 
+        elif args.croptype == "LARGEST":
+            min_width = min(cx, (params["img"].shape[1] - cx))
+            min_height = min(cy, (params["img"].shape[0] - cy))
+
+            if min_width / w < min_height / h:
+                print("WIDTH\n")
+                new_resw, new_resh = 2 * min_width, 2 * int(min_width*h/w)
+            else:
+                new_resw, new_resh = 2 * int(min_height*resw/resh), 2 * min_height
+
+        
+
+        
+
+        
         drawn = params["resized"].copy()
+
         cv2.line(drawn, (x,0), (x,3000), (0,20,0), 1)
         cv2.line(drawn, (0,y), (3000,y), (0,20,0), 1)
 
@@ -89,6 +102,7 @@ def on_click(event, x, y, flags, params):
         rect_height = int((new_resh * params["dim"][1] / h) / 2)
 
         if args.croptype == "GIVEN": cv2.rectangle(drawn, (x - rect_width, y - rect_height), (x + rect_width, y + rect_height), (0, 20, 0), 1)
+        if args.croptype == "LARGEST": cv2.rectangle(drawn, (x - rect_width, y - rect_height), (x + rect_width, y + rect_height), (0, 20, 0), 1)
         cv2.imshow("image", drawn)
 
     elif event == cv2.EVENT_MOUSEWHEEL and args.croptype == "GIVEN":
@@ -157,13 +171,22 @@ def click_centers():
     resw, resh = args.resolution[0], args.resolution[1]
 
     global num_imgs
+
     num_imgs = len(os.listdir(args.input))
 
     new_resw, new_resh = resw * prop[0], resh * prop[0]
 
     directory = args.input
-    deleted = args.deleted
-    out = args.output
+    if args.deleted is None:
+        deleted = f"{args.input}_deleted"
+    else:
+        deleted = args.deleted
+
+    if args.output is None:
+        out = f"{args.input}_out"
+    else:
+        out = args.output
+
     if not os.path.exists(out):
         print(f"Did not find the {out} directory. Creating one...")
         os.mkdir(out)

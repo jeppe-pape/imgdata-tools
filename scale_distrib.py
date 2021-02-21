@@ -33,7 +33,11 @@ def parse_args():
                         action="store_true") 
 
     parser.add_argument("--height", type=int,
-                        help="Pass if preresizing. Desired width of correctly upscaled image",) 
+                        help="Pass if preresizing. Desired width of correctly upscaled image",)
+
+    parser.add_argument("--tolerance", type=float,
+                        help="Float in [0,1]. Determines how much smaller given image should be before getting put in a lower res folder. Default 0",
+                        default=0)
 
     args = parser.parse_args()
     return args
@@ -78,7 +82,7 @@ def distribute_to_upscale(folder, desired_width, max_upscale=4, pre_resize=False
 
             if not os.path.exists(folder_name): os.mkdir(folder_name)
 
-            if get_image_size(path)[0] >= (desired_width / scale) * 0.8:
+            if get_image_size(path)[0] >= (desired_width / scale) * (1 - args.tolerance):
 
                 if pre_resize:
                     img = cv2.imread(path)
